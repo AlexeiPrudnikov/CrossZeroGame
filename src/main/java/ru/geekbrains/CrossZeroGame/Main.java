@@ -4,19 +4,30 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    private static final char DOT_HUMAN = 'X';
-    private static final char DOT_AI = 'O';
-    private static final char DOT_EMPTY = '.';
-    private static final int COUNT_WIN_POINTS = 4;
-    private static final Scanner SCANNER = new Scanner(System.in);
-    private static final Random random = new Random();
-    private static char[][] field;
-    private static int fieldSizeX;
-    private static int fieldSizeY;
 
+     // Изображение хода игрока
+    private static final char DOT_HUMAN = 'X';
+    // Изображение хода компьютера
+    private static final char DOT_AI = 'O';
+    // Изображение пустой клетки
+    private static final char DOT_EMPTY = '.';
+    // Количество подряд идущих символов для выигрыша
+    private static final int COUNT_WIN_POINTS = 4;
+    // Scanner для ввода ходов игрока
+    private static final Scanner SCANNER = new Scanner(System.in);
+    // Random для случайного хода компьютера
+    private static final Random random = new Random();
+    // Поле для игры
+    private static char[][] field;
+    // Размер поля по X
+    private static final int fieldSizeX = 9;
+    // Размер поля по Y
+    private static final int fieldSizeY  = 9;
+
+    /**
+     * Инициализация пустого поля
+     */
     private static void init() {
-        fieldSizeX = 9;
-        fieldSizeY = 9;
         field = new char[fieldSizeY][fieldSizeX];
         for (int y = 0; y < fieldSizeX; y++) {
             for (int x = 0; x < fieldSizeX; x++) {
@@ -26,6 +37,9 @@ public class Main {
         }
     }
 
+    /**
+     * Вывод поля на экран
+     */
     private static void printField() {
 
         System.out.print(" |");
@@ -45,14 +59,31 @@ public class Main {
 
     }
 
+    /**
+     * Проверка возмаожности хода
+     * @param x - Координата X
+     * @param y - Координата Y
+     * @return Возвращает true, если ход возможен, false в противном случае
+     */
     private static boolean isCellEmpty(int x, int y) {
         return field[y][x] == DOT_EMPTY;
     }
 
+    /**
+     * Проверка правильности ввода координат
+     * @param x - Координата X
+     * @param y - Координата Y
+     * @return Возвращает true, если введенные данные в пределах диапазона, false в противном случае
+     */
     private static boolean isCellValid(int x, int y) {
         return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
     }
 
+    /**
+     * Генерация очередного хода
+     * @param isHuman определяет чей ход: true - человек, false - компьютер
+     * @return Возвращает координаты хода
+     */
     private static int[] nextTurn(boolean isHuman) {
         int[] step = new int[2];
         do {
@@ -90,12 +121,27 @@ public class Main {
                         }
                     }
                 }
-                // Проверка возможности 3х подряд у игрока
+                // Проверка возможности n-1 подряд у игрока
                 for (int y = 0; y < fieldSizeY; y++) {
                     for (int x = 0; x < fieldSizeX; x++) {
                         if (field[y][x] == DOT_EMPTY) {
                             field[y][x] = DOT_HUMAN;
                             if (checkWin(true, x, y, COUNT_WIN_POINTS - 1)) {
+                                field[y][x] = DOT_AI;
+                                step[1] = x;
+                                step[0] = y;
+                                return step;
+                            }
+                            field[y][x] = DOT_EMPTY;
+                        }
+                    }
+                }
+                // Проверка возможности сделать n-1 подряд у компьютера
+                for (int y = 0; y < fieldSizeY; y++) {
+                    for (int x = 0; x < fieldSizeX; x++) {
+                        if (field[y][x] == DOT_EMPTY) {
+                            field[y][x] = DOT_AI;
+                            if (checkWin(false, x, y, COUNT_WIN_POINTS - 1)) {
                                 field[y][x] = DOT_AI;
                                 step[1] = x;
                                 step[0] = y;
@@ -117,6 +163,10 @@ public class Main {
         return step;
     }
 
+    /**
+     * Проверка завершения партии
+     * @return Возвращает true, если ходов больше нет, false в противном случае
+     */
     public static boolean isFinish() {
         for (int y = 0; y < fieldSizeY; y++) {
             for (int x = 0; x < fieldSizeX; x++) {
@@ -128,6 +178,14 @@ public class Main {
         return true;
     }
 
+    /**
+     * Проверка выигрыша
+     * @param isHuman true - проверка выигрыша человека, false - компьютера
+     * @param x - Координата X
+     * @param y - Координата Y
+     * @param winPoints - количество очков для выигрыша
+     * @return Возвращает true, если победа, false в противном случае
+     */
     private static boolean checkWin(boolean isHuman, int x, int y, int winPoints) {
         //  Горизонталь
         int count = 1;
